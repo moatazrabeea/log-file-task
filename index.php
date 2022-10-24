@@ -31,7 +31,8 @@
     <input id="file-name" type="text" class="input-group-text col-md-4" placeholder="/path/to/file">
         <a class="btn btn-primary col-md-2" id="view-button">view</a>
 </div>
-<input type="hidden" id="page_number" value="0">
+<input type="hidden" id="page_number" value="1">
+<input type="hidden" id="number-of-pages" value="0">
 <table class="table">
     <tbody>
 
@@ -56,27 +57,58 @@
 
 <script>
     $("#first-page").click(function (){
-        $("#page_number").val(0);
-        let page_number= 0 ;
+        let current_page = parseInt($("#page_number").val());
+
+        if (current_page == 1){
+            alert("this is the first page");
+            return
+        }
+        else {
+        getData(1);
+        $("#page_number").val(1)
+        }
     });
 
     $("#next-page").click(function (){
+        let current_page = parseInt($("#page_number").val());
+        let page_number= parseInt($("#number-of-pages").val());
 
-        let page_number=  parseInt($("#page_number").val());
-        $("#page_number").val(page_number + 1)
-        getData(page_number + 1);
+        if (page_number == current_page){
+            alert("this is the last page");
+            return
+        }
+      else{
+
+        getData(current_page + 1);
+        $("#page_number").val(current_page + 1)
+        }
     })
 
     $("#prev-page").click(function (){
-        let page_number= parseInt($("#page_number").val());
-        $("#page_number").val(page_number - 1)
-        getData(page_number - 1);
+
+        let current_page = parseInt($("#page_number").val());
+
+
+        if (current_page == 1){
+            alert("this is the first page");
+            return
+        }
+        getData(current_page - 1);
+        $("#page_number").val(current_page - 1)
     })
 
     $("#last-page").click(function (){
-        let page_number= -1;
-        $("#page_number").val(page_number)
+        let current_page = parseInt($("#page_number").val());
+        let page_number= parseInt($("#number-of-pages").val());
+
+        if (page_number == current_page){
+            alert("this is the last page");
+           return
+        }
+        else{
         getData(page_number);
+        $("#page_number").val(page_number)
+        }
     })
 
     $("#view-button").click(function(){
@@ -88,7 +120,7 @@
     });
 
     function getData(page_number){
-        debugger;
+
         let fileName = $("#file-name").val();
         $.ajax
         ({
@@ -99,14 +131,15 @@
             success: function(result)
             {
 
-                if (result == false){
+                if (result.success == false){
                     $("table tbody").empty();
                     $("table  tbody").append('<tr><td>There is no Data for your choice</td></tr>');
                 }
                 else{
+                    $("#number-of-pages").val(result.num_of_pages)
                     $("table tbody").empty();
-                for(var key in result){
-                    var value = result[key];
+                for(var key in result.lines_array){
+                    var value = result.lines_array[key];
                     $("table  tbody").append('<tr><td>'+key+'</td><td>'+value+'</td></tr>');
                 }
                 }
@@ -114,7 +147,7 @@
             },
 
             error:function (error){
-
+              console.log(error)
             }
         });
     }

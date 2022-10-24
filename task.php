@@ -1,28 +1,24 @@
 <?php
 
-$per_page = 10;
-$file = $_POST["fileName"];
+$per_page = 10; //number presented fo ervery page
+$file = $_POST["fileName"]; //getting file name we want to read
+$current_page = $_POST["page_number"]; //what is the page number  we want to view
+
 $lines = file($file);//file in to an array
 $lines_array =[];
 
+$numOfPages = ceil((count($lines)) / $per_page); // to avoid float numbers we use ceil to approximate to the higher number
 
 
-  $current_page = $_POST["page_number"];
-
-  if ($current_page == -1){
-      $offset = (count($lines)) - $per_page;
-      $limit = count($lines);
-
-  }
- else{
-  $offset = ($current_page * $per_page);
-  $limit=(($current_page + 1) * $per_page);
- }
+  $current_page -= 1;  // we subtract 1 from the view we want becaue the file array start from zero
 
 
+
+  $offset = ($current_page * $per_page); // the start number of lines
+  $limit=(($current_page + 1) * $per_page) -1; // the end number of lines
 
 while ($offset <= $limit){
-    if ($lines[$offset] == null){
+    if (!isset($lines[$offset]) || $lines[$offset] == null){
        break;
     }
     else{
@@ -32,30 +28,22 @@ while ($offset <= $limit){
     $offset++;
 }
 
+
+    $result = array();
   if(count($lines_array)){
-    echo json_encode($lines_array);
+      $result = [
+          'success' => true,
+          'num_of_pages' =>$numOfPages,
+          'lines_array' => $lines_array
+      ];
+
   }
 
   else{
-      echo false;
+      $result = [
+          'success' => false,
+      ];
   }
 
+echo json_encode($result);
 
-
-  // if(isset($_SESSION['current_line']) && $_SESSION['current_line'] < $total_lines){
-
-  //   $lines = shell_exec('tail -n' . ($total_lines - $_SESSION['current_line']) . ' ' . escapeshellarg($file));
-
-  // } else if(!isset($_SESSION['current_line'])){
-
-  //   $lines = shell_exec('tail -n100 ' . escapeshellarg($file));
-
-  // }
-
-  // $_SESSION['current_line'] = $total_lines;
-
-  // $lines_array = array_filter(preg_split('#[\r\n]+#', trim($lines)));
-
-  // if(count($lines_array)){
-  //   echo json_encode($lines_array);
-  // }
